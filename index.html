@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard VTC Finance</title>
+  <style>
+    :root {
+      --primary:#1a56db; --primary-dark:#1e40af; --success:#10b981;
+      --warning:#f59e0b; --danger:#ef4444; --info:#06b6d4;
+      --bg:#f1f5f9; --card:#fff; --text:#1e293b; --text-muted:#64748b;
+      --border:#e2e8f0; --sidebar-w:260px; --header-h:60px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    
+    #app { display: flex; min-height: 100vh; }
+    
+    /* SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: #1e293b;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-header { padding: 20px; font-size: 1.25rem; font-weight: bold; border-bottom: 1px solid #334155; }
+    .nav-section { padding: 15px 20px 5px; font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+    .nav-item { padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s; color: #cbd5e1; }
+    .nav-item:hover { background: #334155; color: #fff; }
+    .nav-item.active { background: var(--primary); color: #fff; }
+    .nav-icon { font-size: 1.1rem; }
+
+    /* CONTENT */
+    .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+    header { height: var(--header-h); background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    .container { padding: 24px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+    /* CARDS & GRIDS */
+    .grid { display: grid; gap: 20px; margin-bottom: 20px; }
+    .g2 { grid-template-columns: repeat(2, 1fr); }
+    .g3 { grid-template-columns: repeat(3, 1fr); }
+    .g4 { grid-template-columns: repeat(4, 1fr); }
+    .card { background: var(--card); border-radius: 12px; padding: 20px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card-title { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .pos { color: var(--success); }
+    .neg { color: var(--danger); }
+
+    /* TABLES */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th { text-align: left; padding: 12px; border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; }
+    td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+
+    /* BUTTONS */
+    .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 4px 8px; font-size: 0.75rem; }
+
+    /* UTILS */
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .prog-wrap { background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden; margin-top: 8px; }
+    .prog-bar { height: 100%; background: var(--primary); border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">VTC Finance Pro</div>
+    
+    <div class="nav-item active" onclick="nav('dashboard')"><span class="nav-icon">📊</span>Tableau de bord</div>
+    
+    <div class="nav-section">Opérations</div>
+    <div class="nav-item" onclick="nav('vtc-recettes')"><span class="nav-icon">💰</span>Recettes</div>
+    <div class="nav-item" onclick="nav('vtc-depenses')"><span class="nav-icon">💸</span>Dépenses</div>
+
+    <div class="nav-section">Analyse financière</div>
+    <div class="nav-item" onclick="nav('rentabilite')"><span class="nav-icon">📈</span>Rentabilité</div>
+    <div class="nav-item" onclick="nav('bilan')"><span class="nav-icon">📋</span>Bilan annuel</div>
+
+    <div class="nav-section">Flux financiers</div>
+    <div class="nav-item" onclick="nav('transferts')"><span class="nav-icon">🔄</span>Transferts</div>
+    <div class="nav-item" onclick="nav('comptes')"><span class="nav-icon">🏦</span>Comptes bancaires</div>
+    <div class="nav-item" onclick="nav('dettes')"><span class="nav-icon">💳</span>Dettes & Crédits</div>
+    <div class="nav-item" onclick="nav('budget')"><span class="nav-icon">🎯</span>Budget prévisionnel</div>
+
+    <div class="nav-section">Système</div>
+    <div class="nav-item" onclick="nav('documents')"><span class="nav-icon">📂</span>Documents</div>
+    <div class="nav-item" onclick="nav('parametres')"><span class="nav-icon">⚙️</span>Paramètres</div>
+  </aside>
+
+  <main class="main">
+    <header>
+      <h2 id="page-title">Tableau de bord</h2>
+      <div class="flex-between" style="gap:15px">
+        <select id="global-month-select" onchange="updateMonth(this.value)" style="padding:6px; border-radius:4px; border:1px solid var(--border)">
+          <!-- Dynamic months -->
+        </select>
+        <span id="user-name-display" style="font-weight:600">Utilisateur</span>
+      </div>
+    </header>
+
+    <div class="container" id="content-area">
+      <!-- Content injected here -->
+      <div class="grid g3">
+        <div class="card">
+          <div class="card-title">Chiffre d'affaires</div>
+          <div class="stat-value pos">4 250,00 €</div>
+          <div class="prog-wrap"><div class="prog-bar" style="width: 70%"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Charges totales</div>
+          <div class="stat-value neg">1 840,00 €</div>
+          <div class="prog-wrap"><div class="prog-bar" style="width: 43%; background: var(--warning)"></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Bénéfice Net</div>
+          <div class="stat-value" style="color:var(--primary)">2 410,00 €</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="flex-between">
+          <h3 style="margin-bottom:15px">Dernières opérations</h3>
+          <button class="btn btn-outline btn-sm">Voir tout</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Libellé</th>
+              <th>Catégorie</th>
+              <th style="text-align:right">Montant</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>12/05/2024</td>
+              <td>Virement Uber</td>
+              <td>Recettes</td>
+              <td style="text-align:right" class="pos">+ 1 240,00 €</td>
+            </tr>
+            <tr>
+              <td>10/05/2024</td>
+              <td>Plein Carburant</td>
+              <td>Charges</td>
+              <td style="text-align:right" class="neg">- 85,00 €</td>
+            </tr>
+            <tr>
+              <td>08/05/2024</td>
+              <td>Assurance Pro</td>
+              <td>Charges fixes</td>
+              <td style="text-align:right" class="neg">- 145,00 €</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Simple Navigation Logic
+  function nav(pageId) {
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    
+    const titles = {
+      'dashboard': 'Tableau de bord',
+      'vtc-recettes': 'Recettes VTC',
+      'vtc-depenses': 'Dépenses VTC',
+      'rentabilite': 'Analyse de rentabilité',
+      'bilan': 'Bilan annuel',
+      'transferts': 'Transferts internes',
+      'comptes': 'Comptes bancaires',
+      'dettes': 'Dettes & Crédits',
+      'budget': 'Budget prévisionnel',
+      'documents': 'Gestion documentaire',
+      'parametres': 'Paramètres'
+    };
+    
+    document.getElementById('page-title').textContent = titles[pageId] || 'Page';
+    // Logic for loading specific page content would go here
+  }
+
+  function updateMonth(val) {
+    console.log("Month changed to: " + val);
+  }
+
+  // Initialize month select
+  (function init() {
+    const select = document.getElementById('global-month-select');
+    const now = new Date();
+    for(let i=0; i<12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = d.toISOString().substring(0, 7);
+      const label = d.toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+      const opt = new Option(label, val);
+      select.add(opt);
+    }
+  })();
+</script>
+
+</body>
+</html>
